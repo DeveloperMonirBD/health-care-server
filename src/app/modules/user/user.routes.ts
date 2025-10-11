@@ -10,6 +10,7 @@ const router = express.Router();
 // get all Users
 router.get(
     "/",
+    auth(UserRole.ADMIN),
     UserController.getAllFromDB
 )
 
