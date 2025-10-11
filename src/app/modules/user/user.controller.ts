@@ -5,16 +5,19 @@ import sendResponse from '../../shared/sendResponse';
 import { userFilterableFields } from './user.constant';
 import { UserService } from './user.service';
 
+// crate patient
 const createPatient = catchAsync(async (req: Request, res: Response) => {
     const result = await UserService.createPatient(req);
     sendResponse(res, {
         statusCode: 201,
         success: true,
-        message: 'Patient created successfully',
+        message: 'Patient created successfully!',
         data: result
     });
 });
 
+
+// create admin
 const createAdmin = catchAsync(async (req: Request, res: Response) => {
     const result = await UserService.createAdmin(req);
     sendResponse(res, {
@@ -25,6 +28,7 @@ const createAdmin = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// create doctor
 const createDoctor = catchAsync(async (req: Request, res: Response) => {
     const result = await UserService.createDoctor(req);
     sendResponse(res, {
@@ -35,7 +39,7 @@ const createDoctor = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-
+// get all users
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
 
   

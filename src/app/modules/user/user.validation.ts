@@ -1,6 +1,7 @@
 import { Gender } from '@prisma/client';
 import z from 'zod';
 
+// create patient
 const createPatrientValidationSchema = z.object({
     password: z.string(),
     patient: z.object({
@@ -10,6 +11,7 @@ const createPatrientValidationSchema = z.object({
     })
 });
 
+// create admin
 const createAdminValidationSchema = z.object({
     password: z.string({
         error: 'Password is required'
@@ -27,6 +29,7 @@ const createAdminValidationSchema = z.object({
     })
 });
 
+// create doctor
 const createDoctorValidationSchema = z.object({
     password: z.string({
         error: 'Password is required'
@@ -53,7 +56,7 @@ const createDoctorValidationSchema = z.object({
         qualification: z.string({
             error: 'quilification is required'
         }),
-        currentWorkingPlace: z.string({
+        currentWorkplace: z.string({
             error: 'Current working place is required!'
         }),
         designation: z.string({

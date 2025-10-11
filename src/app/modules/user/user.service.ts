@@ -6,6 +6,7 @@ import { IOptions, paginationHelper } from '../../helper/paginationHelper';
 import { prisma } from '../../shared/prisma';
 import { userSearchableFields } from './user.constant';
 
+// create Patient
 const createPatient = async (req: Request) => {
     // // Enhanced password validation
     // const validatePassword = (password: string) => {
@@ -58,6 +59,7 @@ const createPatient = async (req: Request) => {
     return result;
 };
 
+// create admin
 const createAdmin = async (req: Request): Promise<Admin> => {
     const file = req.file;
 
@@ -89,6 +91,7 @@ const createAdmin = async (req: Request): Promise<Admin> => {
     return result;
 };
 
+// create doctor
 const createDoctor = async (req: Request): Promise<Doctor> => {
     const file = req.file;
 
@@ -119,63 +122,7 @@ const createDoctor = async (req: Request): Promise<Doctor> => {
     return result;
 };
 
-// const getAllFromDB = async (params: any, options: IOptions) => {
-//     const { page, limit, skip, sortBy, sortOrder } = paginationHelper.calculatePagination(options);
-//     const { searchTerm, ...filterData } = params;
-
-//     const andConditions: Prisma.UserWhereInput[] = [];
-
-//     if (searchTerm) {
-//         andConditions.push({
-//             OR: userSearchableFields.map(field => ({
-//                 [field]: {
-//                     contains: searchTerm,
-//                     mode: 'insensitive'
-//                 }
-//             }))
-//         });
-//     }
-
-//     if (Object.keys(filterData).length > 0) {
-//         andConditions.push({
-//             AND: Object.keys(filterData).map(key => ({
-//                 [key]: {
-//                     equals: (filterData as any)[key]
-//                 }
-//             }))
-//         });
-//     }
-
-//     const whereConditions: Prisma.UserWhereInput =
-//         andConditions.length > 0
-//             ? {
-//                   AND: andConditions
-//               }
-//             : {};
-
-//     const result = await prisma.user.findMany({
-//         skip,
-//         take: limit,
-
-//         where: whereConditions,
-//         orderBy: {
-//             [sortBy]: sortOrder
-//         }
-//     });
-
-//     const total = await prisma.user.count({
-//         where: whereConditions
-//     });
-//     return {
-//         meta: {
-//             page,
-//             limit,
-//             total
-//         },
-//         data: result
-//     };
-// };
-
+// get all users
 const getAllFromDB = async (params: any, options: any) => {
     const {page, limit, skip, sortBy, sortOrder} = paginationHelper.calculatePagination(options)
     const { searchTerm, ...filterData } = params;

@@ -7,11 +7,13 @@ import { UserValidation } from './user.validation';
 
 const router = express.Router();
 
+// get all Users
 router.get(
     "/",
     UserController.getAllFromDB
 )
 
+// create patient
 router.post(
     "/create-patient",
     fileUploader.upload.single('file'),

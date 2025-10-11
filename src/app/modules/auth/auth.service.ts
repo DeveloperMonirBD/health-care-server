@@ -3,7 +3,6 @@ import { UserStatus } from "@prisma/client";
 import bcrypt from 'bcryptjs';
 import { prisma } from "../../shared/prisma";
 import { loginAuthInput } from "./auth.interface";
-import jwt from 'jsonwebtoken'
 import { jwtHelper } from "../../helper/jwtHelper";
 
 const login = async (payload: loginAuthInput) => {
