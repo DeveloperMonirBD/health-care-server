@@ -1,3 +1,4 @@
+import { IJWTPayload } from './../../types/common';
 import { Request, response, Response } from "express";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
@@ -15,11 +16,12 @@ const insertIntoDB = catchAsync(async(req: Request, res: Response) => {
     })
 })
 
-const schedulesForDoctor = catchAsync(async (req: Request, res: Response) => {
+const schedulesForDoctor = catchAsync(async (req: Request & {user?: IJWTPayload}, res: Response) => {
     const options = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder'])
     const filters = pick(req.query, ["startDateTime", "endDateTime"])
     
-    const result = await ScheduleService.schedulesForDoctor(filters, options);
+    const user = req.user;
+    const result = await ScheduleService.schedulesForDoctor(user as IJWTPayload, filters, options);
 
     sendResponse(res, {
         statusCode: 200,

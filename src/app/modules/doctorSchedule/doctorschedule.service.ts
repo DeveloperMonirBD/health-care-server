@@ -1,16 +1,25 @@
+import { prisma } from '../../shared/prisma';
+import { IJWTPayload } from './../../types/common';
 import { email } from 'zod';
-import { prisma } from "../../shared/prisma";
 
-const insertIntoDB = async (user: any, payload: any) => {
+
+const insertIntoDB = async (user:IJWTPayload, payload: {
+    scheduleIds: string[]
+}) => {
     const doctorData = await prisma.doctor.findUniqueOrThrow({
         where: {
             email: user.email
         }
     })
 
-    console.log({ user, payload });
-    
-    return { user, payload };
+    const doctorScheduleData = payload.scheduleIds.map(scheduleId => ({
+        doctorId: doctorData.id,
+        scheduleId
+    }))
+
+    return await prisma.doctorSchedules.createMany({
+        data: doctorScheduleData
+    })
 }
 
 export const DoctorScheduleService = {
