@@ -1,10 +1,14 @@
-import { Doctor, Prisma } from "@prisma/client";
-import { IOptions, paginationHelper } from "../../helper/paginationHelper";
-import { doctorSearchableFields } from "./doctor.constant";
-import { prisma } from "../../shared/prisma";
-import { IDoctorUpdateInput } from "./doctor.interface";
+import { Prisma } from '@prisma/client';
+import httpStatus from 'http-status';
+import ApiError from '../../errors/ApiError';
+import { openai } from '../../helper/open-router';
+import { IOptions, paginationHelper } from '../../helper/paginationHelper';
+import { prisma } from '../../shared/prisma';
+import { doctorSearchableFields } from './doctor.constant';
+import { IDoctorUpdateInput } from './doctor.interface';
+import { extractJsonFromMessage } from '../../helper/extractJsonFromMessage';
 
-const getAllFromDB = async (filters: any, options:IOptions) => {
+const getAllFromDB = async (filters: any, options: IOptions) => {
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper.calculatePagination(options);
     const { searchTerm, specialties, ...filterData } = filters;
 
@@ -28,22 +32,22 @@ const getAllFromDB = async (filters: any, options:IOptions) => {
                     specialities: {
                         title: {
                             contains: specialties,
-                            mode: "insensitive"
+                            mode: 'insensitive'
                         }
                     }
                 }
             }
-        })
+        });
     }
 
     if (Object.keys(filterData).length > 0) {
-        const filterConditions = Object.keys(filterData).map((key) => ({
+        const filterConditions = Object.keys(filterData).map(key => ({
             [key]: {
                 equals: (filterData as any)[key]
             }
-        }))
+        }));
 
-        andConditions.push(...filterConditions)
+        andConditions.push(...filterConditions);
     }
 
     const whereConditions: Prisma.DoctorWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
@@ -66,7 +70,7 @@ const getAllFromDB = async (filters: any, options:IOptions) => {
 
     const total = await prisma.doctor.count({
         where: whereConditions
-    })
+    });
 
     return {
         meta: {
@@ -75,8 +79,8 @@ const getAllFromDB = async (filters: any, options:IOptions) => {
             limit
         },
         data: result
-    }
-}
+    };
+};
 
 const updateInputDB = async (id: string, payload: Partial<IDoctorUpdateInput>) => {
     const doctorInfo = await prisma.doctor.findUniqueOrThrow({
@@ -87,7 +91,7 @@ const updateInputDB = async (id: string, payload: Partial<IDoctorUpdateInput>) =
 
     const { specialties, ...doctorData } = payload;
 
-    return await prisma.$transaction(async (tnx) => {
+    return await prisma.$transaction(async tnx => {
         if (specialties && specialties.length > 0) {
             const deleteSpecialtyIDS = specialties.filter(specialty => specialty.isDeleted);
 
@@ -129,12 +133,86 @@ const updateInputDB = async (id: string, payload: Partial<IDoctorUpdateInput>) =
         });
 
         return updatedData;
-    })
+    });
+};
 
+const getAISuggestions = async (payload: { symptoms: string }) => {
+    if (!(payload && payload.symptoms)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'symptoms is required!');
+    }
+
+    const doctors = await prisma.doctor.findMany({
+        where: { isDeleted: false },
+        include: {
+            doctorSpecialties: {
+                include: {
+                    specialities: true
+                }
+            }
+        }
+    });
+
+    console.log('doctors data loaded.......\n');
+
+    const prompt = `
+You are a medical assistant AI. Based on the patient's symptoms, suggest the top 3 most suitable doctors.
+Each doctor has specialties and years of experience.
+Only suggest doctors who are relevant to the given symptoms.
+
+Symptoms: ${payload.symptoms}
+
+Here is the doctor list (in JSON):
+${JSON.stringify(doctors, null, 2)}
+
+Return your response in JSON format with full individual doctor data. 
+`;
+
+    console.log('analyzing......\n');
+
+    const completion = await openai.chat.completions.create({
+        model: 'z-ai/glm-4.5-air:free',
+        messages: [
+            {
+                role: 'system',
+                content: 'You are a helpful AI medical assistant that provides doctor suggestions.'
+            },
+            {
+                role: 'user',
+                content: prompt
+            }
+        ]
+    });
+
+    const result = await extractJsonFromMessage(completion.choices[0].message);
+    return result;
     
+    // async function extractJsonFromMessage(message: any): Promise<any> {
+    //     const content = message && (message.content ?? message);
+    //     const text = typeof content === 'string' ? content : JSON.stringify(content);
+
+    //     // Attempt to extract JSON substring (object or array)
+    //     const firstBrace = text.indexOf('{');
+    //     const lastBrace = text.lastIndexOf('}');
+    //     const firstBracket = text.indexOf('[');
+    //     const lastBracket = text.lastIndexOf(']');
+
+    //     let jsonText = text;
+    //     if (firstBrace !== -1 && lastBrace !== -1 && firstBrace < lastBrace) {
+    //         jsonText = text.substring(firstBrace, lastBrace + 1);
+    //     } else if (firstBracket !== -1 && lastBracket !== -1 && firstBracket < lastBracket) {
+    //         jsonText = text.substring(firstBracket, lastBracket + 1);
+    //     }
+
+    //     try {
+    //         return JSON.parse(jsonText);
+    //     } catch (err) {
+    //         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to parse JSON from AI response');
+    //     }
+    // }
 };
 
 export const DoctorService = {
     getAllFromDB,
-    updateInputDB
+    updateInputDB,
+    getAISuggestions
 };
