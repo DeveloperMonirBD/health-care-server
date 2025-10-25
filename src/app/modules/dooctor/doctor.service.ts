@@ -1,4 +1,4 @@
-import { Doctor, Prisma } from '@prisma/client';
+import { Doctor, Prisma, UserStatus } from '@prisma/client';
 import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
 import { openai } from '../../helper/open-router';
