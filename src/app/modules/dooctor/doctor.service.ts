@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Doctor, Prisma } from '@prisma/client';
 import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
 import { openai } from '../../helper/open-router';
@@ -136,6 +136,68 @@ const updateInputDB = async (id: string, payload: Partial<IDoctorUpdateInput>) =
     });
 };
 
+const getByIdFromDB = async (id: string): Promise<Doctor | null> => {
+    const result = await prisma.doctor.findUnique({
+        where: {
+            id,
+            isDeleted: false
+        },
+        include: {
+            doctorSpecialties: {
+                include: {
+                    specialities: true
+                }
+            },
+            doctorSchedules: {
+                include: {
+                    schedule: true
+                }
+            }
+        }
+    });
+    return result;
+};
+
+const deleteFromDB = async (id: string): Promise<Doctor> => {
+    return await prisma.$transaction(async transactionClient => {
+        const deleteDoctor = await transactionClient.doctor.delete({
+            where: {
+                id
+            }
+        });
+
+        await transactionClient.user.delete({
+            where: {
+                email: deleteDoctor.email
+            }
+        });
+
+        return deleteDoctor;
+    });
+};
+
+const softDelete = async (id: string): Promise<Doctor> => {
+    return await prisma.$transaction(async transactionClient => {
+        const deleteDoctor = await transactionClient.doctor.update({
+            where: { id },
+            data: {
+                isDeleted: true
+            }
+        });
+
+        await transactionClient.user.update({
+            where: {
+                email: deleteDoctor.email
+            },
+            data: {
+                status: UserStatus.DELETED
+            }
+        });
+
+        return deleteDoctor;
+    });
+};
+
 const getAISuggestions = async (payload: { symptoms: string }) => {
     if (!(payload && payload.symptoms)) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'symptoms is required!');
@@ -214,5 +276,8 @@ Return your response in JSON format with full individual doctor data.
 export const DoctorService = {
     getAllFromDB,
     updateInputDB,
+    getByIdFromDB,
+    deleteFromDB,
+    softDelete,
     getAISuggestions
 };
