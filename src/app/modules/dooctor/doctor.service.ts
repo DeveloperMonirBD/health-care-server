@@ -1,12 +1,12 @@
 import { Doctor, Prisma, UserStatus } from '@prisma/client';
 import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
+import { extractJsonFromMessage } from '../../helper/extractJsonFromMessage';
 import { openai } from '../../helper/open-router';
 import { IOptions, paginationHelper } from '../../helper/paginationHelper';
 import { prisma } from '../../shared/prisma';
 import { doctorSearchableFields } from './doctor.constant';
 import { IDoctorUpdateInput } from './doctor.interface';
-import { extractJsonFromMessage } from '../../helper/extractJsonFromMessage';
 
 const getAllFromDB = async (filters: any, options: IOptions) => {
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper.calculatePagination(options);
@@ -247,7 +247,7 @@ Return your response in JSON format with full individual doctor data.
 
     const result = await extractJsonFromMessage(completion.choices[0].message);
     return result;
-    
+
     // async function extractJsonFromMessage(message: any): Promise<any> {
     //     const content = message && (message.content ?? message);
     //     const text = typeof content === 'string' ? content : JSON.stringify(content);
