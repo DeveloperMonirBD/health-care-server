@@ -5,6 +5,7 @@ import { IOptions, paginationHelper } from '../../helper/paginationHelper';
 import { AppointmentStatus, Prisma, UserRole } from '@prisma/client';
 import ApiError from '../../errors/ApiError';
 import httpStatus from 'http-status';
+import { stripeClient } from '../../helper/stripe';
 
 const createAppointment = async (user: IJWTPayload, payload: { doctorId: string; scheduleId: string }) => {
     const patientData = await prisma.patient.findUniqueOrThrow({
@@ -66,31 +67,31 @@ const createAppointment = async (user: IJWTPayload, payload: { doctorId: string;
             }
         });
 
-        // const session = await stripe.checkout.sessions.create({
-        //     payment_method_types: ['card'],
-        //     mode: 'payment',
-        //     customer_email: user.email,
-        //     line_items: [
-        //         {
-        //             price_data: {
-        //                 currency: 'bdt',
-        //                 product_data: {
-        //                     name: `Appointment with ${doctorData.name}`
-        //                 },
-        //                 unit_amount: doctorData.appointmentFee * 100
-        //             },
-        //             quantity: 1
-        //         }
-        //     ],
-        //     metadata: {
-        //         appointmentId: appointmentData.id,
-        //         paymentId: paymentData.id
-        //     },
-        //     success_url: `https://www.programming-hero.com/`,
-        //     cancel_url: `https://next.programming-hero.com/`
-        // });
+        const session = await stripeClient.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            customer_email: user.email,
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'bdt',
+                        product_data: {
+                            name: `Appointment with ${doctorData.name}`
+                        },
+                        unit_amount: doctorData.appointmentFee * 100
+                    },
+                    quantity: 1
+                }
+            ],
+            metadata: {
+                appointmentId: appointmentData.id,
+                paymentId: paymentData.id
+            },
+            success_url: `https://www.programming-hero.com/`,
+            cancel_url: `https://next.programming-hero.com/`
+        });
 
-        // return { paymentUrl: session.url };
+        return { paymentUrl: session.url };
 
         return appointmentData
     });
