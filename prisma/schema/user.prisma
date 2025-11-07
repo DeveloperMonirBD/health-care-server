@@ -43,6 +43,7 @@ model Doctor {
   qualification String
   currentWorkplace String
   designation String
+  averageRating Float @default(0)
   isDeleted Boolean @default(false)
   createdAt DateTime @default(now())
 
