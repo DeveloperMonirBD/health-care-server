@@ -1,9 +1,11 @@
+import httpStatus from 'http-status';
 import { Request, Response } from 'express';
 import pick from '../../helper/pick';
 import catchAsync from '../../shared/catchAsync';
 import sendResponse from '../../shared/sendResponse';
 import { userFilterableFields } from './user.constant';
 import { UserService } from './user.service';
+import { IJWTPayload } from '../../types/common';
 
 // crate patient
 const createPatient = catchAsync(async (req: Request, res: Response) => {
@@ -15,7 +17,6 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
         data: result
     });
 });
-
 
 // create admin
 const createAdmin = catchAsync(async (req: Request, res: Response) => {
@@ -56,9 +57,24 @@ const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const getMyProfile = catchAsync(async (req: Request & {user?: IJWTPayload}, res: Response) => {
+    const user = req.user;
+
+    const result = await UserService.getMyProfile(user as IJWTPayload);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "My Profile data fetched successfully",
+        data: result
+    })
+
+})
+
 export const UserController = {
     createPatient,
     createAdmin,
     createDoctor,
-    getAllFromDB
+    getAllFromDB,
+    getMyProfile
 };

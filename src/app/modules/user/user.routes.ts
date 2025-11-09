@@ -14,6 +14,12 @@ router.get(
     UserController.getAllFromDB
 )
 
+router.get(
+    "/me",
+    auth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+    UserController.getMyProfile
+)
+
 // create patient
 router.post(
     "/create-patient",
