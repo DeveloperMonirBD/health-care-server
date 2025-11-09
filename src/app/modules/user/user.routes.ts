@@ -1,4 +1,4 @@
-import { UserRole } from '@prisma/client';
+import { UserRole, Admin } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express';
 import { fileUploader } from '../../helper/fileUploder';
 import auth from '../../middlewares/auth';
@@ -51,6 +51,24 @@ router.post(
         console.log(JSON.parse(req.body.data))
         req.body = UserValidation.createDoctorValidationSchema.parse(JSON.parse(req.body.data))
         return UserController.createDoctor(req, res, next)
+    }
+);
+
+// change profile status
+router.patch(
+    '/:id/status',
+    auth(UserRole.ADMIN),
+    UserController.changeProfileStatus
+);
+
+// update my profile
+router.patch(
+    "/update-my-profile",
+    auth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+    fileUploader.upload.single('file'),
+    (req: Request, res: Response, next: NextFunction) => {
+        req.body = JSON.parse(req.body.data)
+        return UserController.updateMyProfie(req, res, next)
     }
 );
 

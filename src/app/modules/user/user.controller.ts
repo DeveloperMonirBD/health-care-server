@@ -57,6 +57,7 @@ const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+// get my profile
 const getMyProfile = catchAsync(async (req: Request & {user?: IJWTPayload}, res: Response) => {
     const user = req.user;
 
@@ -68,13 +69,41 @@ const getMyProfile = catchAsync(async (req: Request & {user?: IJWTPayload}, res:
         message: "My Profile data fetched successfully",
         data: result
     })
-
 })
+
+// change profile status
+const changeProfileStatus = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await UserService.changeProfileStatus(id, req.body);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: 'Users profile status changed!',
+        data: result
+    });
+});
+
+const updateMyProfie = catchAsync(async (req: Request & { user?: IJWTPayload }, res: Response) => {
+
+    const user = req.user;
+
+    const result = await UserService.updateMyProfie(user as IJWTPayload, req);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "My profile updated!",
+        data: result
+    })
+});
 
 export const UserController = {
     createPatient,
     createAdmin,
     createDoctor,
     getAllFromDB,
-    getMyProfile
+    getMyProfile,
+    changeProfileStatus,
+    updateMyProfie
 };
