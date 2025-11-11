@@ -2,7 +2,7 @@ import { prisma } from '../../shared/prisma';
 import { IJWTPayload } from '../../types/common';
 import { v4 as uuidv4 } from 'uuid';
 import { IOptions, paginationHelper } from '../../helper/paginationHelper';
-import { AppointmentStatus, Prisma, UserRole } from '@prisma/client';
+import { AppointmentStatus, PaymentStatus, Prisma, UserRole } from '@prisma/client';
 import ApiError from '../../errors/ApiError';
 import httpStatus from 'http-status';
 import { stripeClient } from '../../helper/stripe';
@@ -181,8 +181,59 @@ const updateAppointmentStatus = async (appointmentId: string, status: Appointmen
     });
 };
 
+
+const cancelUnpaidAppointments = async () => {
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+    const unpaidAppointments = await prisma.appointment.findMany({
+        where: {
+            createdAt: {
+                lte: thirtyMinutesAgo
+            },
+            paymentStatus: PaymentStatus.UNPAID
+            
+        }
+    })
+
+    const appointmentIdsToCancel = unpaidAppointments.map(appointment => appointment.id);
+
+    await prisma.$transaction(async (tnx) => {
+        await tnx.payment.deleteMany({
+            where: {
+                appointmentId: {
+                    in: appointmentIdsToCancel
+                }
+            }
+        })
+
+        await tnx.appointment.deleteMany({
+            where: {
+                id: {
+                    in: appointmentIdsToCancel
+                }
+            }
+        })
+
+        for (const unpaidAppointment of unpaidAppointments) {
+             await tnx.doctorSchedules.update({
+                 where: {
+                     doctorId_scheduleId: {
+                         doctorId: unpaidAppointment.doctorId,
+                         scheduleId: unpaidAppointment.scheduleId
+                     }
+                 },
+                 data: {
+                     isBooked: false
+                 }
+             });
+        }
+    })
+}
+
+
 export const AppointmentService = {
     createAppointment,
     getMyAppointment,
-    updateAppointmentStatus
+    updateAppointmentStatus,
+    cancelUnpaidAppointments
 };
