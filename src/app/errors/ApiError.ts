@@ -5,10 +5,11 @@ class ApiError extends Error {
         this.statusCode = statusCode;
         if (stack) {
             this.stack = stack
-        } else {
+        }
+        else {
             Error.captureStackTrace(this, this.constructor);
         }
     }
 }
 
-export default ApiError
+export default ApiError;

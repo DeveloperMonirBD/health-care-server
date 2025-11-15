@@ -7,7 +7,6 @@ export default {
     node_env: process.env.NODE_ENV,
     port: process.env.PORT,
     database_url: process.env.DATABASE_URL,
-    bcrypt_salt_round: process.env.BCRYPT_SALT_ROUNDS,
     cloudinary: {
         api_secret: process.env.CLOUDINARY_API_SECRET,
         cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -15,9 +14,6 @@ export default {
     },
     openRouterApiKey: process.env.OPENROUTER_API_KEY,
     stripeSecretKey: process.env.STRIPE_SECRET_KEY,
-    clientUrl: process.env.CLIENT_URL,
-
-    //* start email sender config
     emailSender: {
         email: process.env.EMAIL,
         app_pass: process.env.APP_PASS
@@ -32,4 +28,4 @@ export default {
     },
     salt_round: process.env.SALT_ROUND,
     reset_pass_link: process.env.RESET_PASS_LINK
-};
+}

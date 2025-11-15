@@ -1,8 +1,9 @@
-import { PaymentStatus, UserRole } from '@prisma/client';
-import httpStatus from 'http-status';
-import ApiError from '../../errors/ApiError';
-import { prisma } from '../../shared/prisma';
-import { IJWTPayload } from '../../types/common';
+import { PaymentStatus, UserRole } from "@prisma/client";
+import { IJWTPayload } from "../../types/common";
+import httpStatus from 'http-status'
+import ApiError from "../../errors/ApiError";
+import { prisma } from "../../shared/prisma";
+
 
 const fetchDashboardMetaData = async (user: IJWTPayload) => {
     let metadata;
@@ -17,11 +18,12 @@ const fetchDashboardMetaData = async (user: IJWTPayload) => {
             metadata = await getPatientMetaData(user);
             break;
         default:
-            throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid user role!');
+            throw new ApiError(httpStatus.BAD_REQUEST, "Invalid user role!")
     }
 
     return metadata;
 };
+
 
 const getDoctorMetaData = async (user: IJWTPayload) => {
     const doctorData = await prisma.doctor.findUniqueOrThrow({
@@ -72,7 +74,7 @@ const getDoctorMetaData = async (user: IJWTPayload) => {
     const formattedAppointmentStatusDistribution = appointmentStatusDistribution.map(({ status, _count }) => ({
         status,
         count: Number(_count.id)
-    }));
+    }))
 
     return {
         appointmentCount,
@@ -80,8 +82,8 @@ const getDoctorMetaData = async (user: IJWTPayload) => {
         patientCount: patientCount.length,
         totalRevenue,
         formattedAppointmentStatusDistribution
-    };
-};
+    }
+}
 
 const getPatientMetaData = async (user: IJWTPayload) => {
     const patientData = await prisma.patient.findUniqueOrThrow({
@@ -119,22 +121,23 @@ const getPatientMetaData = async (user: IJWTPayload) => {
     const formattedAppointmentStatusDistribution = appointmentStatusDistribution.map(({ status, _count }) => ({
         status,
         count: Number(_count.id)
-    }));
+    }))
 
     return {
         appointmentCount,
         prescriptionCount,
         reviewCount,
         formattedAppointmentStatusDistribution
-    };
-};
+    }
+}
+
 
 const getAdminMetaData = async () => {
     const patientCount = await prisma.patient.count();
     const doctorCount = await prisma.doctor.count();
     const adminCount = await prisma.admin.count();
-    const appointmentCount = await prisma.appointment.count();
-    const paymentCount = await prisma.payment.count();
+    const appointmentCount = await prisma.appointment.count()
+    const paymentCount = await prisma.payment.count()
 
     const totalRevenue = await prisma.payment.aggregate({
         _sum: {
@@ -143,7 +146,7 @@ const getAdminMetaData = async () => {
         where: {
             status: PaymentStatus.PAID
         }
-    });
+    })
 
     const barChartData = await getBarChartData();
     const pieChartData = await getPieChartData();
@@ -157,8 +160,10 @@ const getAdminMetaData = async () => {
         totalRevenue,
         barChartData,
         pieChartData
-    };
-};
+    }
+
+}
+
 
 const getBarChartData = async () => {
     const appointmentCountPerMonth = await prisma.$queryRaw`
@@ -167,10 +172,10 @@ const getBarChartData = async () => {
         FROM "appointments"
         GROUP BY month
         ORDER BY month ASC
-    `;
+    `
 
-    return appointmentCountPerMonth;
-};
+    return appointmentCountPerMonth
+}
 
 const getPieChartData = async () => {
     const appointmentStatusDistribution = await prisma.appointment.groupBy({
@@ -184,8 +189,9 @@ const getPieChartData = async () => {
     }));
 
     return formatedAppointmentStatusDistribution;
-};
+}
+
 
 export const MetaService = {
     fetchDashboardMetaData
-};
+}

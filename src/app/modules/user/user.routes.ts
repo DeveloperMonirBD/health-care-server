@@ -1,13 +1,13 @@
-import { UserRole, Admin } from '@prisma/client';
-import express, { NextFunction, Request, Response } from 'express';
-import { fileUploader } from '../../helper/fileUploder';
-import auth from '../../middlewares/auth';
+import express, { NextFunction, Request, Response } from 'express'
 import { UserController } from './user.controller';
+import { fileUploader } from '../../helper/fileUploader';
 import { UserValidation } from './user.validation';
+import { UserRole } from '@prisma/client';
+import auth from '../../middlewares/auth';
+
 
 const router = express.Router();
 
-// get all Users
 router.get(
     "/",
     auth(UserRole.ADMIN),
@@ -15,23 +15,20 @@ router.get(
 )
 
 router.get(
-    "/me",
+    '/me',
     auth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
     UserController.getMyProfile
 )
 
-// create patient
 router.post(
     "/create-patient",
     fileUploader.upload.single('file'),
     (req: Request, res: Response, next: NextFunction) => {
-        req.body = UserValidation.createPatrientValidationSchema.parse(JSON.parse(req.body.data))
-        
-        return UserController.createPatient(req, res, next);
+        req.body = UserValidation.createPatientValidationSchema.parse(JSON.parse(req.body.data))
+        return UserController.createPatient(req, res, next)
     }
 )
 
-// create admin
 router.post(
     "/create-admin",
     auth(UserRole.ADMIN),
@@ -42,7 +39,6 @@ router.post(
     }
 );
 
-// create doctor
 router.post(
     "/create-doctor",
     auth(UserRole.ADMIN),
@@ -54,14 +50,12 @@ router.post(
     }
 );
 
-// change profile status
 router.patch(
     '/:id/status',
     auth(UserRole.ADMIN),
     UserController.changeProfileStatus
 );
 
-// update my profile
 router.patch(
     "/update-my-profile",
     auth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
@@ -71,6 +65,5 @@ router.patch(
         return UserController.updateMyProfie(req, res, next)
     }
 );
-
 
 export const userRoutes = router;

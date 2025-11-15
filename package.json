@@ -1,8 +1,8 @@
 {
-  "name": "health-care-server",
+  "name": "ph-health-care-starter",
   "version": "1.0.0",
   "main": "server.js",
-  "author": "Monirul Islam <",
+  "author": "shafayat",
   "license": "MIT",
   "prisma": {
     "schema": "./prisma/schema"
@@ -12,8 +12,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.0.0",
+    "@types/nodemailer": "^7.0.2",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
@@ -25,19 +24,19 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
-    "nodemailer": "^7.0.10",
-    "openai": "^6.6.0",
-    "stripe": "^19.2.0",
+    "nodemailer": "^7.0.9",
+    "openai": "^6.3.0",
+    "stripe": "^19.1.0",
     "uuid": "^13.0.0",
-    "zod": "^4.1.12"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
     "@types/node": "^24.5.0",
-    "@types/nodemailer": "^7.0.3",
-    "@types/uuid": "^10.0.0",
     "prisma": "^6.16.3",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.2"

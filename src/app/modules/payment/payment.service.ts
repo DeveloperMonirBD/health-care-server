@@ -1,10 +1,10 @@
-import Stripe from 'stripe';
-import { prisma } from '../../shared/prisma';
-import { PaymentStatus } from '@prisma/client';
+import Stripe from "stripe";
+import { prisma } from "../../shared/prisma";
+import { PaymentStatus } from "@prisma/client";
 
 const handleStripeWebhookEvent = async (event: Stripe.Event) => {
     switch (event.type) {
-        case 'checkout.session.completed': {
+        case "checkout.session.completed": {
             const session = event.data.object as any;
 
             const appointmentId = session.metadata?.appointmentId;
@@ -15,19 +15,19 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
                     id: appointmentId
                 },
                 data: {
-                    paymentStatus: session.payment_status === 'paid' ? PaymentStatus.PAID : PaymentStatus.UNPAID
+                    paymentStatus: session.payment_status === "paid" ? PaymentStatus.PAID : PaymentStatus.UNPAID
                 }
-            });
+            })
 
             await prisma.payment.update({
                 where: {
                     id: paymentId
                 },
                 data: {
-                    status: session.payment_status === 'paid' ? PaymentStatus.PAID : PaymentStatus.UNPAID,
+                    status: session.payment_status === "paid" ? PaymentStatus.PAID : PaymentStatus.UNPAID,
                     paymentGatewayData: session
                 }
-            });
+            })
 
             break;
         }
@@ -39,4 +39,4 @@ const handleStripeWebhookEvent = async (event: Stripe.Event) => {
 
 export const PaymentService = {
     handleStripeWebhookEvent
-};
+}

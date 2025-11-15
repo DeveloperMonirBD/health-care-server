@@ -1,6 +1,6 @@
 export const extractJsonFromMessage = (message: any) => {
     try {
-        const content = message?.content || '';
+        const content = message?.content || "";
 
         // 1. Try to extract JSON code block (```json ... ```)
         const jsonBlockMatch = content.match(/```json([\s\S]*?)```/);
@@ -10,7 +10,7 @@ export const extractJsonFromMessage = (message: any) => {
         }
 
         // 2. If no code block, try to directly parse JSON if response is plain JSON
-        if (content.trim().startsWith('[') || content.trim().startsWith('{')) {
+        if (content.trim().startsWith("[") || content.trim().startsWith("{")) {
             return JSON.parse(content);
         }
 
@@ -23,7 +23,7 @@ export const extractJsonFromMessage = (message: any) => {
         // 4. If still no valid JSON found
         return [];
     } catch (error) {
-        console.error('Error parsing AI response:', error);
+        console.error("Error parsing AI response:", error);
         return [];
     }
 };

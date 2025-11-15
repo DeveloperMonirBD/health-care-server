@@ -1,16 +1,17 @@
 import express from 'express';
-import { AdminRoutes } from '../modules/admin/admin.routes';
-import { authRoutes } from '../modules/auth/auth.routes';
-import { doctorScheduleRoutes } from '../modules/doctorSchedule/doctorSchedule.routes';
-import { DoctorRoutes } from '../modules/dooctor/doctor.routes';
-import { PatientRoutes } from '../modules/patient/patient.router';
-import { ScheduleRoutes } from '../modules/schedule/schedule.route';
-import { SpecialtiesRoutes } from '../modules/specialties/specialties.routes';
 import { userRoutes } from '../modules/user/user.routes';
+import { authRoutes } from '../modules/auth/auth.routes';
+import { ScheduleRoutes } from '../modules/schedule/schedule.routes';
+import { doctorScheduleRoutes } from '../modules/doctorSchedule/doctorSchedule.routes';
+import { SpecialtiesRoutes } from '../modules/specialties/specialties.routes';
+import { DoctorRoutes } from '../modules/doctor/doctor.routes';
+import { AdminRoutes } from '../modules/admin/admin.routes';
+import { PatientRoutes } from '../modules/patient/patient.routes';
 import { AppointmentRoutes } from '../modules/appointment/appointment.routes';
-import { PrescriptionRoutes } from '../modules/prescription/prescription.route';
+import { PrescriptionRoutes } from '../modules/prescription/prescription.routes';
 import { ReviewRoutes } from '../modules/review/review.routes';
 import { MetaRoutes } from '../modules/meta/meta.routes';
+
 
 const router = express.Router();
 
@@ -26,14 +27,6 @@ const moduleRoutes = [
     {
         path: '/schedule',
         route: ScheduleRoutes
-    },
-    {
-        path: '/doctor-schedule',
-        route: doctorScheduleRoutes
-    },
-    {
-        path: '/specialties',
-        route: SpecialtiesRoutes
     },
     {
         path: '/doctor-schedule',
@@ -70,9 +63,9 @@ const moduleRoutes = [
     {
         path: '/metadata',
         route: MetaRoutes
-    }
+    },
 ];
 
-moduleRoutes.forEach(route => router.use(route.path, route.route));
+moduleRoutes.forEach(route => router.use(route.path, route.route))
 
 export default router;

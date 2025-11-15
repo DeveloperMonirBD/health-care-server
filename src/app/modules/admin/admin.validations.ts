@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 const update = z.object({
     body: z.object({
@@ -7,6 +7,7 @@ const update = z.object({
     })
 });
 
+
 export const adminValidationSchemas = {
     update
-};
+}
