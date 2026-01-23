@@ -1,0 +1,9 @@
+model Schedules {
+  id              String            @id
+  startDateTime   DateTime
+  endDateTime     DateTime
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  appointments    Appointment[]
+  doctorSchedules DoctorSchedules[]
+}

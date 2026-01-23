@@ -1,20 +1,22 @@
-import { Gender } from "@prisma/client";
+import { Gender } from '@prisma/client';
 
 export type IDoctorUpdateInput = {
-    email: string;
-    contactNumber: string;
-    gender: Gender;
-    appointmentFee: number;
-    name: string;
-    address: string;
-    registrationNumber: string;
-    experience: number;
-    qualification: string;
-    currentWorkingPlace: string;
-    designation: string;
-    isDeleted: boolean;
-    specialties: {
-        specialtyId: string;
-        isDeleted?: boolean;
-    }[]
-}
+    email?: string;
+    contactNumber?: string;
+    gender?: Gender;
+    appointmentFee?: number;
+    name?: string;
+    address?: string;
+    registrationNumber?: string;
+    experience?: number;
+    qualification?: string;
+    currentWorkingPlace?: string;
+    designation?: string;
+    isDeleted?: boolean;
+
+    // Add specialties
+    specialties?: string[];
+
+    // Remove specialties
+    removeSpecialties?: string[];
+};

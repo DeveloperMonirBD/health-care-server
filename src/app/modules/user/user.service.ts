@@ -1,3 +1,4 @@
+import { DoctorSpecialties } from './../../../../node_modules/.prisma/client/index.d';
 import { Request } from "express";
 import { prisma } from "../../shared/prisma";
 import bcrypt from "bcryptjs";
@@ -72,6 +73,7 @@ const createDoctor = async (req: Request): Promise<Doctor> => {
         const uploadToCloudinary = await fileUploader.uploadToCloudinary(file);
         req.body.doctor.profilePhoto = uploadToCloudinary?.secure_url
     }
+
     const hashedPassword: string = await bcrypt.hash(req.body.password, 10)
 
     const userData = {
@@ -80,16 +82,70 @@ const createDoctor = async (req: Request): Promise<Doctor> => {
         role: UserRole.DOCTOR
     }
 
+    // Extract specialties from doctor data
+    const { specialties, ...doctorData } = req.body.doctor;
+
     const result = await prisma.$transaction(async (transactionClient) => {
+        // step 1: Create user
         await transactionClient.user.create({
             data: userData
         });
 
+        // step 2: Create doctor
         const createdDoctorData = await transactionClient.doctor.create({
             data: req.body.doctor
         });
 
-        return createdDoctorData;
+        // step 3: Create doctor specialties if provided
+        if (specialties && Array.isArray(specialties) && specialties.length > 0) {
+            // Verify all specialties exist
+            const existingSpecialties = await transactionClient.specialties.findMany({
+                where: {
+                    id: {
+                        in: specialties,
+                    },
+                },
+                select: {
+                    id: true,
+                },
+            });
+
+            const existingSpecialityIds = existingSpecialties.map(s => s.id);
+            const invalidSpecialties = specialties.filter(id => !existingSpecialityIds.includes(id));
+
+            if (invalidSpecialties.length > 0) {
+                throw new Error(
+                    `Invalid speciality IDs: ${invalidSpecialties.join(", ")}`
+                );
+            }
+
+            // Create doctor specialties relations
+            const DoctorSpecialtiesData = specialties.map((specialityId) => ({
+                doctorId: createdDoctorData.id,
+                specialitiesId: specialityId
+            }));
+
+            await transactionClient.doctorSpecialties.createMany({
+                data: DoctorSpecialtiesData
+            });
+        }
+
+        // Step 4: Return doctor with specialities
+        const doctorWithSpecialties = await transactionClient.doctor.findUnique({
+            where: {
+                id: createdDoctorData.id,
+            },
+            include: {
+                doctorSpecialties: {
+                    include: {
+                        specialities: true,
+                    },
+                },
+            },
+        });
+
+        return doctorWithSpecialties!;
+        // return createdDoctorData;
     });
 
     return result;
