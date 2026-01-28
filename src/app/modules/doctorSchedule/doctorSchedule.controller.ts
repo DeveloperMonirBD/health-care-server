@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
-import catchAsync from "../../shared/catchAsync";
-import sendResponse from "../../shared/sendResponse";
-import { DoctorScheduleService } from "./doctorSchedule.service";
-import { IJWTPayload } from "../../types/common";
+import { Request, Response } from 'express';
 import httpStatus from 'http-status';
-import pick from "../../helper/pick";
-import { scheduleFilterableFields } from "./doctorSchedule.constant";
+import catchAsync from '../../../shared/catchAsync';
+import sendResponse from '../../../shared/sendResponse';
+import pick from '../../helper/pick';
+import { IJWTPayload } from '../../types/common';
+import { scheduleFilterableFields } from './doctorSchedule.constant';
+import { DoctorScheduleService } from './doctorSchedule.service';
 
 const insertIntoDB = catchAsync(async (req: Request & { user?: IJWTPayload }, res: Response) => {
     const user = req.user;
@@ -14,9 +14,9 @@ const insertIntoDB = catchAsync(async (req: Request & { user?: IJWTPayload }, re
     sendResponse(res, {
         statusCode: 201,
         success: true,
-        message: "Doctor Schedule created successfully!",
+        message: 'Doctor Schedule created successfully!',
         data: result
-    })
+    });
 });
 
 const getMySchedule = catchAsync(async (req: Request & { user?: IJWTPayload }, res: Response) => {
@@ -29,13 +29,12 @@ const getMySchedule = catchAsync(async (req: Request & { user?: IJWTPayload }, r
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: "My Schedule fetched successfully!",
+        message: 'My Schedule fetched successfully!',
         data: result
     });
 });
 
 const deleteFromDB = catchAsync(async (req: Request & { user?: IJWTPayload }, res: Response) => {
-
     const user = req.user;
     const { id } = req.params;
     const result = await DoctorScheduleService.deleteFromDB(user as IJWTPayload, id);
@@ -43,7 +42,7 @@ const deleteFromDB = catchAsync(async (req: Request & { user?: IJWTPayload }, re
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: "My Schedule deleted successfully!",
+        message: 'My Schedule deleted successfully!',
         data: result
     });
 });
@@ -57,14 +56,13 @@ const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
         success: true,
         message: 'Doctor Schedule retrieval successfully',
         meta: result.meta,
-        data: result.data,
+        data: result.data
     });
 });
-
 
 export const DoctorScheduleController = {
     insertIntoDB,
     getAllFromDB,
     getMySchedule,
     deleteFromDB
-}
+};

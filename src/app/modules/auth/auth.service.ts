@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs';
 import httpStatus from 'http-status';
 import { Secret } from 'jsonwebtoken';
 import config from '../../../config';
+import { prisma } from '../../../shared/prisma';
 import ApiError from '../../errors/ApiError';
 import { jwtHelper } from '../../helper/jwtHelper';
-import { prisma } from '../../shared/prisma';
 import emailSender from './emailSender';
 
 const login = async (payload: { email: string; password: string }) => {

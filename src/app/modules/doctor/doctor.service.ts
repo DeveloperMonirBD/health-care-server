@@ -3,13 +3,13 @@ import { DoctorSpecialties } from './../../../../node_modules/.prisma/client/ind
 import { Doctor, Prisma, UserStatus } from '@prisma/client';
 import { IOptions, paginationHelper } from '../../helper/paginationHelper';
 import { doctorSearchableFields } from './doctor.constant';
-import { prisma } from '../../shared/prisma';
 import { IDoctorUpdateInput } from './doctor.interface';
 import ApiError from '../../errors/ApiError';
 import httpStatus from 'http-status';
 import { openai } from '../../helper/open-router';
 import { extractJsonFromMessage } from '../../helper/extractJsonFromMessage';
 import { includes } from 'zod';
+import { prisma } from '../../../shared/prisma';
 
 const getAllFromDB = async (filters: any, options: IOptions) => {
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper.calculatePagination(options);

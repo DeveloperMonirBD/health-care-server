@@ -1,13 +1,13 @@
-import { stripe } from "../../helper/stripe";
-import { prisma } from "../../shared/prisma";
-import { IJWTPayload } from "../../types/common";
+import { AppointmentStatus, PaymentStatus, Prisma, UserRole } from '@prisma/client';
+import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
-import { IOptions, paginationHelper } from "../../helper/paginationHelper";
-import { AppointmentStatus, PaymentStatus, Prisma, UserRole } from "@prisma/client";
-import ApiError from "../../errors/ApiError";
-import httpStatus from 'http-status'
+import { prisma } from '../../../shared/prisma';
+import ApiError from '../../errors/ApiError';
+import { IOptions, paginationHelper } from '../../helper/paginationHelper';
+import { stripe } from '../../helper/stripe';
+import { IJWTPayload } from '../../types/common';
 
-const createAppointment = async (user: IJWTPayload, payload: { doctorId: string, scheduleId: string }) => {
+const createAppointment = async (user: IJWTPayload, payload: { doctorId: string; scheduleId: string }) => {
     const patientData = await prisma.patient.findUniqueOrThrow({
         where: {
             email: user.email
@@ -27,11 +27,11 @@ const createAppointment = async (user: IJWTPayload, payload: { doctorId: string,
             scheduleId: payload.scheduleId,
             isBooked: false
         }
-    })
+    });
 
     const videoCallingId = uuidv4();
 
-    const result = await prisma.$transaction(async (tnx) => {
+    const result = await prisma.$transaction(async tnx => {
         const appointmentData = await tnx.appointment.create({
             data: {
                 patientId: patientData.id,
@@ -39,7 +39,7 @@ const createAppointment = async (user: IJWTPayload, payload: { doctorId: string,
                 scheduleId: payload.scheduleId,
                 videoCallingId
             }
-        })
+        });
 
         await tnx.doctorSchedules.update({
             where: {
@@ -51,7 +51,7 @@ const createAppointment = async (user: IJWTPayload, payload: { doctorId: string,
             data: {
                 isBooked: true
             }
-        })
+        });
 
         const transactionId = uuidv4();
 
@@ -61,39 +61,37 @@ const createAppointment = async (user: IJWTPayload, payload: { doctorId: string,
                 amount: doctorData.appointmentFee,
                 transactionId
             }
-        })
+        });
 
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
-            mode: "payment",
+            payment_method_types: ['card'],
+            mode: 'payment',
             customer_email: user.email,
             line_items: [
                 {
                     price_data: {
-                        currency: "bdt",
+                        currency: 'bdt',
                         product_data: {
-                            name: `Appointment with ${doctorData.name}`,
+                            name: `Appointment with ${doctorData.name}`
                         },
-                        unit_amount: doctorData.appointmentFee * 100,
+                        unit_amount: doctorData.appointmentFee * 100
                     },
-                    quantity: 1,
-                },
+                    quantity: 1
+                }
             ],
             metadata: {
                 appointmentId: appointmentData.id,
                 paymentId: paymentData.id
             },
             success_url: `https://www.programming-hero.com/`,
-            cancel_url: `https://next.programming-hero.com/`,
+            cancel_url: `https://next.programming-hero.com/`
         });
 
         return { paymentUrl: session.url };
-    })
-
+    });
 
     return result;
 };
-
 
 const getMyAppointment = async (user: IJWTPayload, filters: any, options: IOptions) => {
     const { page, limit, skip, sortBy, sortOrder } = paginationHelper.calculatePagination(options);
@@ -106,14 +104,13 @@ const getMyAppointment = async (user: IJWTPayload, filters: any, options: IOptio
             patient: {
                 email: user.email
             }
-        })
-    }
-    else if (user.role === UserRole.DOCTOR) {
+        });
+    } else if (user.role === UserRole.DOCTOR) {
         andConditions.push({
             doctor: {
                 email: user.email
             }
-        })
+        });
     }
 
     if (Object.keys(filterData).length > 0) {
@@ -121,9 +118,9 @@ const getMyAppointment = async (user: IJWTPayload, filters: any, options: IOptio
             [key]: {
                 equals: (filterData as any)[key]
             }
-        }))
+        }));
 
-        andConditions.push(...filterConditions)
+        andConditions.push(...filterConditions);
     }
 
     const whereConditions: Prisma.AppointmentWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
@@ -135,8 +132,7 @@ const getMyAppointment = async (user: IJWTPayload, filters: any, options: IOptio
         orderBy: {
             [sortBy]: sortOrder
         },
-        include: user.role === UserRole.DOCTOR ?
-            { patient: true } : { doctor: true }
+        include: user.role === UserRole.DOCTOR ? { patient: true } : { doctor: true }
     });
 
     const total = await prisma.appointment.count({
@@ -150,12 +146,10 @@ const getMyAppointment = async (user: IJWTPayload, filters: any, options: IOptio
             page
         },
         data: result
-    }
-
-}
+    };
+};
 
 // task get all data from db (appointment data) - admin
-
 
 const updateAppointmentStatus = async (appointmentId: string, status: AppointmentStatus, user: IJWTPayload) => {
     const appointmentData = await prisma.appointment.findUniqueOrThrow({
@@ -168,8 +162,7 @@ const updateAppointmentStatus = async (appointmentId: string, status: Appointmen
     });
 
     if (user.role === UserRole.DOCTOR) {
-        if (!(user.email === appointmentData.doctor.email))
-            throw new ApiError(httpStatus.BAD_REQUEST, "This is not your appointment")
+        if (!(user.email === appointmentData.doctor.email)) throw new ApiError(httpStatus.BAD_REQUEST, 'This is not your appointment');
     }
 
     return await prisma.appointment.update({
@@ -179,14 +172,10 @@ const updateAppointmentStatus = async (appointmentId: string, status: Appointmen
         data: {
             status
         }
-    })
+    });
+};
 
-}
-
-const getAllFromDB = async (
-    filters: any,
-    options: IOptions
-) => {
+const getAllFromDB = async (filters: any, options: IOptions) => {
     const { limit, page, skip } = paginationHelper.calculatePagination(options);
     const { patientEmail, doctorEmail, ...filterData } = filters;
     const andConditions = [];
@@ -196,19 +185,18 @@ const getAllFromDB = async (
             patient: {
                 email: patientEmail
             }
-        })
-    }
-    else if (doctorEmail) {
+        });
+    } else if (doctorEmail) {
         andConditions.push({
             doctor: {
                 email: doctorEmail
             }
-        })
+        });
     }
 
     if (Object.keys(filterData).length > 0) {
         andConditions.push({
-            AND: Object.keys(filterData).map((key) => {
+            AND: Object.keys(filterData).map(key => {
                 return {
                     [key]: {
                         equals: (filterData as any)[key]
@@ -219,8 +207,7 @@ const getAllFromDB = async (
     }
 
     // console.dir(andConditions, { depth: Infinity })
-    const whereConditions: Prisma.AppointmentWhereInput =
-        andConditions.length > 0 ? { AND: andConditions } : {};
+    const whereConditions: Prisma.AppointmentWhereInput = andConditions.length > 0 ? { AND: andConditions } : {};
 
     const result = await prisma.appointment.findMany({
         where: whereConditions,
@@ -230,8 +217,8 @@ const getAllFromDB = async (
             options.sortBy && options.sortOrder
                 ? { [options.sortBy]: options.sortOrder }
                 : {
-                    createdAt: 'desc',
-                },
+                      createdAt: 'desc'
+                  },
         include: {
             doctor: true,
             patient: true
@@ -245,9 +232,9 @@ const getAllFromDB = async (
         meta: {
             total,
             page,
-            limit,
+            limit
         },
-        data: result,
+        data: result
     };
 };
 
@@ -261,18 +248,18 @@ const cancelUnpaidAppointments = async () => {
             },
             paymentStatus: PaymentStatus.UNPAID
         }
-    })
+    });
 
     const appointmentIdsToCancel = unPaidAppointments.map(appointment => appointment.id);
 
-    await prisma.$transaction(async (tnx) => {
+    await prisma.$transaction(async tnx => {
         await tnx.payment.deleteMany({
             where: {
                 appointmentId: {
                     in: appointmentIdsToCancel
                 }
             }
-        })
+        });
 
         await tnx.appointment.deleteMany({
             where: {
@@ -280,7 +267,7 @@ const cancelUnpaidAppointments = async () => {
                     in: appointmentIdsToCancel
                 }
             }
-        })
+        });
 
         for (const unPaidAppointment of unPaidAppointments) {
             await tnx.doctorSchedules.update({
@@ -293,10 +280,10 @@ const cancelUnpaidAppointments = async () => {
                 data: {
                     isBooked: false
                 }
-            })
+            });
         }
-    })
-}
+    });
+};
 
 export const AppointmentService = {
     createAppointment,

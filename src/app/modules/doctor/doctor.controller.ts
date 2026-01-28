@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import catchAsync from "../../shared/catchAsync";
 import pick from "../../helper/pick";
 import { DoctorService } from "./doctor.service";
-import sendResponse from "../../shared/sendResponse";
 import { doctorFilterableFields } from "./doctor.constant";
+import catchAsync from "../../../shared/catchAsync";
+import sendResponse from "../../../shared/sendResponse";
+import { getSafeId } from "../../../shared/getSafeId";
 
 const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
     const options = pick(req.query, ["page", "limit", "sortBy", "sortOrder"]);
@@ -21,22 +22,24 @@ const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
 })
 
 const updateIntoDB = catchAsync(async (req: Request, res: Response) => {
-
-    const { id } = req.params;
+    // const { id } = req.params;
+    const id = getSafeId(req.params.id);
 
     const result = await DoctorService.updateIntoDB(id, req.body);
 
     sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: "Doctor updated successfully!",
+        message: 'Doctor updated successfully!',
         data: result
-    })
+    });
 })
 
 
 const getByIdFromDB = catchAsync(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    // const { id } = req.params;
+    const id = getSafeId(req.params.id);
+    
     const result = await DoctorService.getByIdFromDB(id);
     sendResponse(res, {
         statusCode: 200,
@@ -47,7 +50,9 @@ const getByIdFromDB = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    // const { id } = req.params;
+    const id = getSafeId(req.params.id);
+
     const result = await DoctorService.deleteFromDB(id);
     sendResponse(res, {
         statusCode: 200,
@@ -59,7 +64,9 @@ const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
 
 
 const softDelete = catchAsync(async (req: Request, res: Response) => {
-    const { id } = req.params;
+    // const { id } = req.params;
+    const id = getSafeId(req.params.id);
+    
     const result = await DoctorService.softDelete(id);
     sendResponse(res, {
         statusCode: 200,

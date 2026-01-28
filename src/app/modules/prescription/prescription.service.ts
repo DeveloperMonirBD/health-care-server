@@ -1,9 +1,9 @@
-import { AppointmentStatus, PaymentStatus, Prescription, UserRole } from "@prisma/client";
-import { IJWTPayload } from "../../types/common";
-import { prisma } from "../../shared/prisma";
-import ApiError from "../../errors/ApiError";
-import httpStatus from 'http-status'
-import { IOptions, paginationHelper } from "../../helper/paginationHelper";
+import { AppointmentStatus, PaymentStatus, Prescription, UserRole } from '@prisma/client';
+import httpStatus from 'http-status';
+import { prisma } from '../../../shared/prisma';
+import ApiError from '../../errors/ApiError';
+import { IOptions, paginationHelper } from '../../helper/paginationHelper';
+import { IJWTPayload } from '../../types/common';
 
 const createPrescription = async (user: IJWTPayload, payload: Partial<Prescription>) => {
     const appointmentData = await prisma.appointment.findUniqueOrThrow({
@@ -15,11 +15,10 @@ const createPrescription = async (user: IJWTPayload, payload: Partial<Prescripti
         include: {
             doctor: true
         }
-    })
+    });
 
     if (user.role === UserRole.DOCTOR) {
-        if (!(user.email === appointmentData.doctor.email))
-            throw new ApiError(httpStatus.BAD_REQUEST, "This is not your appointment")
+        if (!(user.email === appointmentData.doctor.email)) throw new ApiError(httpStatus.BAD_REQUEST, 'This is not your appointment');
     }
 
     const result = await prisma.prescription.create({
@@ -36,7 +35,7 @@ const createPrescription = async (user: IJWTPayload, payload: Partial<Prescripti
     });
 
     return result;
-}
+};
 
 const patientPrescription = async (user: IJWTPayload, options: IOptions) => {
     const { limit, page, skip, sortBy, sortOrder } = paginationHelper.calculatePagination(options);
@@ -57,7 +56,7 @@ const patientPrescription = async (user: IJWTPayload, options: IOptions) => {
             patient: true,
             appointment: true
         }
-    })
+    });
 
     const total = await prisma.prescription.count({
         where: {
@@ -65,7 +64,7 @@ const patientPrescription = async (user: IJWTPayload, options: IOptions) => {
                 email: user.email
             }
         }
-    })
+    });
 
     return {
         meta: {
@@ -74,12 +73,10 @@ const patientPrescription = async (user: IJWTPayload, options: IOptions) => {
             limit
         },
         data: result
-    }
-
+    };
 };
-
 
 export const PrescriptionService = {
     createPrescription,
     patientPrescription
-}
+};

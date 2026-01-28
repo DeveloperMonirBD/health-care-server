@@ -11,8 +11,9 @@
     "dev": "ts-node-dev --respawn --transpile-only ./src/server.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.16.3",
+    "@prisma/client": "^6.19.0",
     "@types/nodemailer": "^7.0.2",
+    "axios": "^1.13.4",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
@@ -31,13 +32,14 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
+    "@types/axios": "^0.9.36",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.5.0",
-    "prisma": "^6.16.3",
+    "prisma": "^6.19.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.2"
   }

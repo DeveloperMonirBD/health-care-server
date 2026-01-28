@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
-import httpStatus from "http-status";
-import { SpecialtiesService } from "./specialties.service";
-import catchAsync from "../../shared/catchAsync";
-import sendResponse from "../../shared/sendResponse";
+import { Request, Response } from 'express';
+import httpStatus from 'http-status';
+import catchAsync from '../../../shared/catchAsync';
+import sendResponse from '../../../shared/sendResponse';
+import { SpecialtiesService } from './specialties.service';
 
 const inserIntoDB = catchAsync(async (req: Request, res: Response) => {
     const result = await SpecialtiesService.inserIntoDB(req);
@@ -10,7 +10,7 @@ const inserIntoDB = catchAsync(async (req: Request, res: Response) => {
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: "Specialties created successfully!",
+        message: 'Specialties created successfully!',
         data: result
     });
 });
@@ -21,7 +21,7 @@ const getAllFromDB = catchAsync(async (req: Request, res: Response) => {
         statusCode: httpStatus.OK,
         success: true,
         message: 'Specialties data fetched successfully',
-        data: result,
+        data: result
     });
 });
 
@@ -32,7 +32,7 @@ const deleteFromDB = catchAsync(async (req: Request, res: Response) => {
         statusCode: httpStatus.OK,
         success: true,
         message: 'Specialty deleted successfully',
-        data: result,
+        data: result
     });
 });
 
