@@ -6,6 +6,7 @@ import pick from '../../helper/pick';
 import { IJWTPayload } from '../../types/common';
 import { appointmentFilterableFields } from './appointment.constant';
 import { AppointmentService } from './appointment.service';
+import { getSafeId } from '../../../shared/getSafeId';
 
 const createAppointment = catchAsync(async (req: Request & { user?: IJWTPayload }, res: Response) => {
     const user = req.user;
@@ -34,7 +35,8 @@ const getMyAppointment = catchAsync(async (req: Request & { user?: IJWTPayload }
 });
 
 const updateAppointmentStatus = catchAsync(async (req: Request & { user?: IJWTPayload }, res: Response) => {
-    const { id } = req.params;
+    // const { id } = req.params;
+    const id = getSafeId(req.params.id);
     const { status } = req.body;
     const user = req.user;
 
