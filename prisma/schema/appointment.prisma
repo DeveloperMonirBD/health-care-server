@@ -1,0 +1,65 @@
+model Appointment {
+  id             String            @id @default(uuid())
+  patientId      String
+  doctorId       String
+  scheduleId     String
+  videoCallingId String
+  status         AppointmentStatus @default(SCHEDULED)
+  paymentStatus  PaymentStatus     @default(UNPAID)
+  updatedAt      DateTime          @updatedAt
+  createdAt      DateTime          @default(now())
+  doctor         Doctor            @relation(fields: [doctorId], references: [id])
+  patient        Patient           @relation(fields: [patientId], references: [id])
+  schedule       Schedules         @relation(fields: [scheduleId], references: [id])
+  payment        Payment?
+  prescription   Prescription?
+  review         Review?
+
+  @@map("appointments")
+}
+
+model Payment {
+  id                 String        @id @default(uuid())
+  appointmentId      String        @unique
+  amount             Float
+  transactionId      String        @unique
+  status             PaymentStatus @default(UNPAID)
+  paymentGatewayData Json?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  appointment        Appointment   @relation(fields: [appointmentId], references: [id])
+
+  @@map("payments")
+}
+
+model Prescription {
+  id            String      @id @default(uuid())
+  appointmentId String      @unique
+  doctorId      String
+  patientId     String
+  instructions  String
+  followUpDate  DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  doctor        Doctor      @relation(fields: [doctorId], references: [id])
+  patient       Patient     @relation(fields: [patientId], references: [id])
+
+  @@map("prescriptions")
+}
+
+model Review {
+  id            String      @id @default(uuid())
+  patientId     String
+  doctorId      String
+  appointmentId String      @unique
+  rating        Int
+  comment       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  doctor        Doctor      @relation(fields: [doctorId], references: [id])
+  patient       Patient     @relation(fields: [patientId], references: [id])
+
+  @@map("reviews")
+}
